@@ -10,51 +10,65 @@ defmodule Aoc.Day2 do
   def day(), do: 2
 
   @impl Day
-  def a(instructions) do
-    instructions
-    |> Enum.reduce([0, 0], &parse_instruction/2)
-    |> Enum.product()
+  def a(games) do
+    games
+    |> Enum.filter(&valid_game?(&1, %{blue: 14, green: 13, red: 12}))
+    |> Enum.map(& &1.number)
+    |> Enum.sum()
   end
 
   @impl Day
-  def b(instructions) do
-    instructions
-    |> Enum.reduce([0, 0, 0], &parse_instruction/2)
-    |> tl()
-    |> Enum.product()
+  def b(games) do
+    games
+    |> Enum.map(&(&1.blue * &1.green * &1.red))
+    |> Enum.sum()
   end
 
   @impl Day
   def parse_input() do
     with {:ok, file} <- Day.load(__MODULE__) do
       file
-      |> String.split(~r/\s/, trim: true)
-      |> Enum.chunk_every(2)
-      |> Enum.map(fn [command, value] -> {command, String.to_integer(value)} end)
+      |> String.split("\n", trim: true)
+      |> Enum.map(&parse_game/1)
     end
   end
 
-  defp parse_instruction({"forward", value}, [x, y]) do
-    [x + value, y]
+  defp parse_game(line) do
+    [text, number, instructions] = Regex.run(~r/Game (\d+): (.+)/, line)
+
+    %{
+      blue: 0,
+      green: 0,
+      red: 0,
+      text: text,
+      number: String.to_integer(number),
+      instructions: String.split(instructions, "; ", trim: true)
+    }
+    |> run_game()
   end
 
-  defp parse_instruction({"up", value}, [x, y]) do
-    [x, y - value]
+  defp run_game(%{instructions: instructions} = game) do
+    Enum.reduce(instructions, game, &do_run_game/2)
   end
 
-  defp parse_instruction({"down", value}, [x, y]) do
-    [x, y + value]
+  defp do_run_game(round, game) do
+    round
+    |> String.split(", ", trim: true)
+    |> Enum.reduce(game, &do_run_instruction/2)
   end
 
-  defp parse_instruction({"forward", value}, [aim, x, y]) do
-    [aim, x + value, y + value * aim]
+  defp do_run_instruction(instruction, game) do
+    [number, color] = String.split(instruction, " ", trim: true)
+    number = String.to_integer(number)
+    color = String.to_existing_atom(color)
+    Map.update!(game, color, &max(&1, number))
   end
 
-  defp parse_instruction({"up", value}, [aim, x, y]) do
-    [aim - value, x, y]
-  end
-
-  defp parse_instruction({"down", value}, [aim, x, y]) do
-    [aim + value, x, y]
+  defp valid_game?(%{blue: blue, green: green, red: red}, %{
+         blue: blue_max,
+         green: green_max,
+         red: red_max
+       }) do
+    blue <= blue_max and green <= green_max and red <= red_max
   end
 end
