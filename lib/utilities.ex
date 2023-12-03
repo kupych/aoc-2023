@@ -29,4 +29,29 @@ defmodule Aoc.Utilities do
     |> String.codepoints()
     |> Enum.map(&String.to_integer/1)
   end
+
+  @doc """
+  `get_adjacent/2` takes a coordinate formatted like {x, y}
+  and returns a list of all adjacent coordinates. If the optional
+  `diagonal` parameter is set to `true`, diagonal coordinates
+  are included as well
+  """
+  def get_adjacent(coords, diagonal \\ false)
+
+  def get_adjacent({x, y}, :diagonal) do
+    [
+      {x - 1, y - 1},
+      {x, y - 1},
+      {x + 1, y - 1},
+      {x - 1, y},
+      {x + 1, y},
+      {x - 1, y + 1},
+      {x, y + 1},
+      {x + 1, y + 1}
+    ]
+  end
+
+  def get_adjacent({x, y}, _) do
+    [{x, y - 1}, {x - 1, y}, {x + 1, y}, {x, y + 1}]
+  end
 end
