@@ -6,6 +6,8 @@ defmodule Aoc.Day5 do
 
   alias Aoc.Day
 
+  require IEx
+
   @impl Day
   def day(), do: 5
 
@@ -26,15 +28,13 @@ defmodule Aoc.Day5 do
       |> Enum.map(&String.to_integer/1)
       |> Enum.chunk_every(2)
       |> Enum.map(fn [start, length] -> {start, start + length - 1} end)
-      |> IO.inspect()
 
     {mapped, to_map, _} = Enum.reduce(lines, {seeds, [], "seed"}, &process_line_b/2)
 
     mapped
     |> Kernel.++(to_map)
-    |> IO.inspect()
-
-    :not_solved
+    |> Enum.map(&elem(&1, 0))
+    |> Enum.min()
   end
 
   @impl Day
@@ -64,11 +64,11 @@ defmodule Aoc.Day5 do
   def process_line_b(line, {to_map, mapped, active} = acc) do
     case Regex.run(~r/^\w+\-to\-(\w+)/, line) do
       [_, new_active] ->
-        {to_map ++ mapped, [], new_active}
+        {Enum.uniq(to_map ++ mapped), [], new_active}
 
       nil ->
         {matches, no_matches} = do_map_ranges(line, acc)
-        {no_matches, mapped ++ matches, active} |> IO.inspect()
+        {no_matches, mapped ++ matches, active}
     end
   end
 
@@ -115,17 +115,22 @@ defmodule Aoc.Day5 do
   defp in_range?(_, _, _), do: false
 
   defp get_overlap({min, max}, start, end_range, diff) do
+    #IO.inspect("is #{min} and #{max} within #{start} and #{end_range}?", label: :overlap)
     cond do
-      min >= start and max <= end_range ->
+      min >= start and min < end_range and max > start and max <= end_range ->
+      #IO.inspect("completely within")
         {[{min + diff, max + diff}], []}
 
-      max <= end_range ->
+      max > start and max <= end_range ->
+      #IO.inspect("overlaps on the right")
         {[{start + diff, max + diff}], [{min, start - 1}]}
 
-      min >= start ->
+      min < end_range and min >= start ->
+      #IO.inspect("overlaps on the left")
         {[{min + diff, end_range + diff}], [{end_range + 1, max}]}
 
       true ->
+      #IO.inspect("completely outside")
         {[], [{min, max}]}
     end
   end
