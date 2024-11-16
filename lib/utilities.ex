@@ -54,4 +54,23 @@ defmodule Aoc.Utilities do
   def get_adjacent({x, y}, _) do
     [{x, y - 1}, {x - 1, y}, {x + 1, y}, {x, y + 1}]
   end
+
+  @doc """
+  Calculates the greatest common divisor (GCD) of a list of integers.
+  """
+  def gcd([number | numbers]) do
+    Enum.reduce(numbers, number, &do_gcd/2)
+  end
+
+  defp do_gcd(a, 0), do: a
+  defp do_gcd(a, b), do: do_gcd(b, rem(a, b))
+
+  @doc """
+  Calculates the least common multiple (LCM) of a list of integers.
+  """
+  def lcm([number | numbers]) do
+    Enum.reduce(numbers, number, &do_lcm/2)
+  end
+
+  defp do_lcm(a, b), do: trunc(a * b / do_gcd(a, b))
 end
