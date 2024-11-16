@@ -51,31 +51,29 @@ defmodule Aoc.Day3 do
   def parse_schematic([], acc), do: acc
 
   def parse_schematic(grid, acc) do
-    acc =
-      acc
-      |> Map.put(:grid, parse_grid(grid))
-      |> get_symbols()
-      |> get_numbers()
+    acc
+    |> Map.put(:grid, parse_grid(grid))
+    |> get_symbols()
+    |> get_numbers()
   end
 
   defp parse_grid(grid) do
     max_y = Enum.count(grid) - 1
     max_x = Enum.count(Enum.at(grid, 0)) - 1
 
-    grid =
-      grid
+    grid
+    |> Enum.with_index()
+    |> Enum.map(fn {row, y} ->
+      row
       |> Enum.with_index()
-      |> Enum.map(fn {row, y} ->
-        row
-        |> Enum.with_index()
-        |> Enum.map(fn {char, x} ->
-          {{x, y}, char}
-        end)
+      |> Enum.map(fn {char, x} ->
+        {{x, y}, char}
       end)
-      |> List.flatten()
-      |> Enum.into(%{})
-      |> Map.put(:max_x, max_x)
-      |> Map.put(:max_y, max_y)
+    end)
+    |> List.flatten()
+    |> Enum.into(%{})
+    |> Map.put(:max_x, max_x)
+    |> Map.put(:max_y, max_y)
   end
 
   defp get_symbols(%{grid: grid} = acc) do

@@ -51,7 +51,7 @@ defmodule Aoc.Day5 do
     |> then(&{&1, [], "soil"})
   end
 
-  def process_line(line, {to_map, mapped, active} = acc) do
+  def process_line(line, {to_map, mapped, _} = acc) do
     case Regex.run(~r/^\w+\-to\-(\w+)/, line) do
       [_, new_active] ->
         {to_map ++ mapped, [], new_active}
@@ -72,7 +72,7 @@ defmodule Aoc.Day5 do
     end
   end
 
-  defp do_map(line, {to_map, mapped, active} = acc) do
+  defp do_map(line, {to_map, mapped, active}) do
     [dest, source, length] =
       line
       |> String.split(" ", trim: true)
@@ -86,13 +86,13 @@ defmodule Aoc.Day5 do
     |> then(&{no_matches, mapped ++ &1, active})
   end
 
-  defp do_map_ranges(line, {to_map, mapped, active} = acc) do
+  defp do_map_ranges(line, {to_map, _, _}) do
     [dest, source, length] =
       line
       |> String.split(" ", trim: true)
       |> Enum.map(&String.to_integer/1)
 
-    {matches, no_matches} = maybe_split_and_process_ranges(to_map, {[], []}, source, length, dest)
+    maybe_split_and_process_ranges(to_map, {[], []}, source, length, dest)
   end
 
   defp maybe_split_and_process_ranges([], {matches, no_matches}, _, _, _),
@@ -115,22 +115,22 @@ defmodule Aoc.Day5 do
   defp in_range?(_, _, _), do: false
 
   defp get_overlap({min, max}, start, end_range, diff) do
-    #IO.inspect("is #{min} and #{max} within #{start} and #{end_range}?", label: :overlap)
+    # IO.inspect("is #{min} and #{max} within #{start} and #{end_range}?", label: :overlap)
     cond do
       min >= start and min < end_range and max > start and max <= end_range ->
-      #IO.inspect("completely within")
+        # IO.inspect("completely within")
         {[{min + diff, max + diff}], []}
 
       max > start and max <= end_range ->
-      #IO.inspect("overlaps on the right")
+        # IO.inspect("overlaps on the right")
         {[{start + diff, max + diff}], [{min, start - 1}]}
 
       min < end_range and min >= start ->
-      #IO.inspect("overlaps on the left")
+        # IO.inspect("overlaps on the left")
         {[{min + diff, end_range + diff}], [{end_range + 1, max}]}
 
       true ->
-      #IO.inspect("completely outside")
+        # IO.inspect("completely outside")
         {[], [{min, max}]}
     end
   end
