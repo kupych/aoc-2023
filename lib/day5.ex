@@ -115,22 +115,17 @@ defmodule Aoc.Day5 do
   defp in_range?(_, _, _), do: false
 
   defp get_overlap({min, max}, start, end_range, diff) do
-    # IO.inspect("is #{min} and #{max} within #{start} and #{end_range}?", label: :overlap)
     cond do
       min >= start and min < end_range and max > start and max <= end_range ->
-        # IO.inspect("completely within")
         {[{min + diff, max + diff}], []}
 
       max > start and max <= end_range ->
-        # IO.inspect("overlaps on the right")
         {[{start + diff, max + diff}], [{min, start - 1}]}
 
       min < end_range and min >= start ->
-        # IO.inspect("overlaps on the left")
         {[{min + diff, end_range + diff}], [{end_range + 1, max}]}
 
       true ->
-        # IO.inspect("completely outside")
         {[], [{min, max}]}
     end
   end

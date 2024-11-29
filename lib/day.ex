@@ -39,9 +39,29 @@ defmodule Aoc.Day do
       "The solution to 1a is: 12345"
       "The solution to 1b is: 12345"
   """
-  def solve(module) do
+  def solve() do
+    :aoc
+    |> :application.get_key(:modules)
+    |> elem(1)
+    |> IO.inspect()
+    |> Enum.filter(&Kernel.function_exported?(&1, :a, 1))
+    |> Enum.sort_by(&apply(&1, :day, []))
+    |> IO.inspect()
+    |> Enum.each(&solve(&1))
+  end
+
+  def solve(module) when is_atom(module) do
     data = module.parse_input()
     IO.puts("The solution to #{module.day()}a is: #{module.a(data)}")
     IO.puts("The solution to #{module.day()}b is: #{module.b(data)}")
+  end
+
+  def solve(day) when is_integer(day) do
+    module = Module.concat(Aoc, "Day#{day}")
+
+    case Kernel.function_exported?(module, :a, 1) do
+      true -> solve(module)
+      false -> :invalid_day
+    end
   end
 end

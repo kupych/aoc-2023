@@ -43,7 +43,7 @@ defmodule Aoc.Day6 do
   end
 
   def will_beat_record?(speed, record, distance) do
-    (speed * (record - speed)) >= distance
+    speed * (record - speed) >= distance
   end
 
   defp process_line(line) do
